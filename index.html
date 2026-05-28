@@ -1,360 +1,499 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Grünland Rohfaser Rechner</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f3f4f6;
-      margin: 0;
-      padding: 20px;
+<title>Grünland RF & NDF Rechner</title>
+
+<style>
+
+body{
+    margin:0;
+    padding:20px;
+    background:#f3f4f6;
+    font-family:Arial,sans-serif;
+}
+
+.container{
+    max-width:1200px;
+    margin:auto;
+}
+
+.card{
+    background:white;
+    border-radius:20px;
+    padding:20px;
+    margin-bottom:20px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.08);
+}
+
+h1,h2{
+    margin-top:0;
+}
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:15px;
+}
+
+input{
+    width:100%;
+    padding:12px;
+    border-radius:12px;
+    border:1px solid #ccc;
+    box-sizing:border-box;
+    margin-top:5px;
+    font-size:16px;
+}
+
+button{
+    width:100%;
+    background:black;
+    color:white;
+    border:none;
+    padding:15px;
+    border-radius:14px;
+    font-size:16px;
+    cursor:pointer;
+    margin-top:20px;
+}
+
+.result{
+    font-size:42px;
+    font-weight:bold;
+    margin-top:10px;
+}
+
+.small{
+    color:#666;
+    margin-top:8px;
+}
+
+.formula{
+    font-size:15px;
+    margin-top:10px;
+    line-height:1.5;
+    word-break:break-word;
+}
+
+.table-wrap{
+    overflow-x:auto;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:800px;
+}
+
+th,td{
+    text-align:left;
+    padding:10px;
+    border-bottom:1px solid #ddd;
+    font-size:14px;
+}
+
+.history-box{
+    background:#f8f8f8;
+    border-radius:12px;
+    padding:12px;
+    margin-bottom:10px;
+}
+
+@media(max-width:700px){
+
+    body{
+        padding:10px;
     }
 
-    .container {
-      max-width: 1200px;
-      margin: auto;
+    .card{
+        padding:15px;
     }
 
-    .card {
-      background: white;
-      border-radius: 20px;
-      padding: 20px;
-      margin-bottom: 20px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    .result{
+        font-size:34px;
     }
 
-    h1,h2 {
-      margin-top: 0;
-    }
+}
 
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
-      gap: 15px;
-    }
-
-    input {
-      width: 100%;
-      padding: 10px;
-      border-radius: 10px;
-      border: 1px solid #ccc;
-      margin-top: 5px;
-      box-sizing: border-box;
-    }
-
-    button {
-      background: black;
-      color: white;
-      border: none;
-      padding: 14px 20px;
-      border-radius: 14px;
-      cursor: pointer;
-      margin-top: 20px;
-      font-size: 16px;
-    }
-
-    .result {
-      font-size: 34px;
-      font-weight: bold;
-      margin-top: 10px;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    th, td {
-      padding: 10px;
-      border-bottom: 1px solid #ddd;
-      text-align: left;
-    }
-
-    .formula {
-      font-size: 14px;
-      color: #444;
-      margin-top: 10px;
-      word-break: break-word;
-    }
-
-    .history-box {
-      background: #f8f8f8;
-      padding: 12px;
-      border-radius: 12px;
-      margin-bottom: 10px;
-    }
-
-  </style>
+</style>
 </head>
 <body>
 
 <div class="container">
 
-  <div class="card">
+    <div class="card">
 
-    <h1>Grünland Rohfaser & NDF Rechner</h1>
+        <h1>Grünland Rohfaser & NDF Rechner</h1>
 
-    <div class="grid">
+        <div class="grid">
 
-      <div>
-        <label>Jahr</label>
-        <input type="number" id="year" value="2026">
-      </div>
+            <div>
+                <label>Jahr</label>
+                <input type="number" id="year" value="2026">
+            </div>
 
-      <div>
-        <label>Schnitt</label>
-        <input type="number" id="schnitt" value="1">
-      </div>
+            <div>
+                <label>Schnitt</label>
+                <input type="number" id="schnitt" value="1">
+            </div>
 
-      <div>
-        <label>TM-Ertrag (t/ha)</label>
-        <input type="number" step="0.1" id="tm" value="3">
-      </div>
+            <div>
+                <label>TM-Ertrag (t/ha)</label>
+                <input type="number" step="0.1" id="tm" value="3">
+            </div>
 
-      <div>
-        <label>RP (% TM)</label>
-        <input type="number" step="0.1" id="rp" value="16.9">
-      </div>
+            <div>
+                <label>RP (% TM)</label>
+                <input type="number" step="0.1" id="rp" value="16.9">
+            </div>
 
-      <div>
-        <label>RF Labor (%)</label>
-        <input type="number" step="0.1" id="rfLabor">
-      </div>
+            <div>
+                <label>RF Labor (%)</label>
+                <input type="number" step="0.1" id="rfLabor">
+            </div>
 
-      <div>
-        <label>NDF Labor (%)</label>
-        <input type="number" step="0.1" id="ndfLabor">
-      </div>
+            <div>
+                <label>NDF Labor (%)</label>
+                <input type="number" step="0.1" id="ndfLabor">
+            </div>
+
+        </div>
+
+        <div class="grid" style="margin-top:25px;">
+
+            <div class="card">
+
+                <h2>Geschätzte Rohfaser</h2>
+
+                <div class="result" id="rfResult">0%</div>
+
+                <div class="small" id="quality"></div>
+
+            </div>
+
+            <div class="card">
+
+                <h2>Geschätzte NDF</h2>
+
+                <div class="result" id="ndfResult">0%</div>
+
+            </div>
+
+            <div class="card">
+
+                <h2>Aktuelle Formel</h2>
+
+                <div class="formula" id="rfFormula"></div>
+
+                <div class="formula" id="ndfFormula"></div>
+
+            </div>
+
+        </div>
+
+        <button onclick="saveEntry()">
+            Schnitt speichern & Formel anpassen
+        </button>
 
     </div>
 
-    <div class="grid" style="margin-top:30px;">
+    <div class="card">
 
-      <div class="card">
-        <h2>Geschätzte Rohfaser</h2>
-        <div class="result" id="rfResult">0%</div>
-      </div>
+        <h2>Gespeicherte Schnitte</h2>
 
-      <div class="card">
-        <h2>Geschätzte NDF</h2>
-        <div class="result" id="ndfResult">0%</div>
-      </div>
+        <div class="table-wrap">
 
-      <div class="card">
-        <h2>Aktuelle Formel</h2>
+            <table>
 
-        <div class="formula" id="rfFormula"></div>
-        <div class="formula" id="ndfFormula"></div>
+                <thead>
 
-      </div>
+                    <tr>
+                        <th>Jahr</th>
+                        <th>Schnitt</th>
+                        <th>TM</th>
+                        <th>RP</th>
+                        <th>RF geschätzt</th>
+                        <th>RF Labor</th>
+                        <th>NDF geschätzt</th>
+                        <th>NDF Labor</th>
+                    </tr>
+
+                </thead>
+
+                <tbody id="entriesTable"></tbody>
+
+            </table>
+
+        </div>
 
     </div>
 
-    <button onclick="saveEntry()">
-      Schnitt speichern & Formel anpassen
-    </button>
+    <div class="card">
 
-  </div>
+        <h2>Formel Verlauf</h2>
 
-  <div class="card">
+        <div id="history"></div>
 
-    <h2>Gespeicherte Schnitte</h2>
-
-    <table>
-
-      <thead>
-        <tr>
-          <th>Jahr</th>
-          <th>Schnitt</th>
-          <th>TM</th>
-          <th>RP</th>
-          <th>RF geschätzt</th>
-          <th>RF Labor</th>
-          <th>NDF geschätzt</th>
-          <th>NDF Labor</th>
-        </tr>
-      </thead>
-
-      <tbody id="entriesTable"></tbody>
-
-    </table>
-
-  </div>
-
-  <div class="card">
-
-    <h2>Formel Verlauf</h2>
-
-    <div id="history"></div>
-
-  </div>
+    </div>
 
 </div>
 
 <script>
 
-let rfBase = 31.5;
-let rfRp = 0.65;
-let rfTm = 0.15;
+let rfBase =
+    parseFloat(localStorage.getItem("rfBase")) || 31.5;
 
-let ndfBase = 48;
-let ndfRp = 0.8;
-let ndfTm = 0.25;
+let rfRp =
+    parseFloat(localStorage.getItem("rfRp")) || 0.65;
 
-let entries = [];
-let history = [];
+let rfTm =
+    parseFloat(localStorage.getItem("rfTm")) || 0.15;
 
-function calculate() {
+let ndfBase =
+    parseFloat(localStorage.getItem("ndfBase")) || 48;
 
-  const tm = parseFloat(document.getElementById("tm").value) || 0;
-  const rp = parseFloat(document.getElementById("rp").value) || 0;
+let ndfRp =
+    parseFloat(localStorage.getItem("ndfRp")) || 0.8;
 
-  const rf =
-    rfBase - (rfRp * rp) + (rfTm * tm);
+let ndfTm =
+    parseFloat(localStorage.getItem("ndfTm")) || 0.25;
 
-  const ndf =
-    ndfBase - (ndfRp * rp) + (ndfTm * tm);
+let entries =
+    JSON.parse(localStorage.getItem("entries")) || [];
 
-  document.getElementById("rfResult").innerText =
-    rf.toFixed(2) + "%";
+let history =
+    JSON.parse(localStorage.getItem("history")) || [];
 
-  document.getElementById("ndfResult").innerText =
-    ndf.toFixed(2) + "%";
+function calculate(){
 
-  document.getElementById("rfFormula").innerText =
-    `RF = ${rfBase.toFixed(2)} - (${rfRp.toFixed(3)} × RP) + (${rfTm.toFixed(3)} × TM)`;
+    const tm =
+        parseFloat(document.getElementById("tm").value) || 0;
 
-  document.getElementById("ndfFormula").innerText =
-    `NDF = ${ndfBase.toFixed(2)} - (${ndfRp.toFixed(3)} × RP) + (${ndfTm.toFixed(3)} × TM)`;
+    const rp =
+        parseFloat(document.getElementById("rp").value) || 0;
 
-  return {
-    rf,
-    ndf
-  };
-}
+    const rf =
+        rfBase - (rfRp * rp) + (rfTm * tm);
 
-function saveEntry() {
+    const ndf =
+        ndfBase - (ndfRp * rp) + (ndfTm * tm);
 
-  const calc = calculate();
+    document.getElementById("rfResult").innerText =
+        rf.toFixed(2) + "%";
 
-  const year =
-    document.getElementById("year").value;
+    document.getElementById("ndfResult").innerText =
+        ndf.toFixed(2) + "%";
 
-  const schnitt =
-    document.getElementById("schnitt").value;
+    document.getElementById("rfFormula").innerText =
+        `RF = ${rfBase.toFixed(2)} - (${rfRp.toFixed(3)} × RP) + (${rfTm.toFixed(3)} × TM)`;
 
-  const tm =
-    document.getElementById("tm").value;
+    document.getElementById("ndfFormula").innerText =
+        `NDF = ${ndfBase.toFixed(2)} - (${ndfRp.toFixed(3)} × RP) + (${ndfTm.toFixed(3)} × TM)`;
 
-  const rp =
-    document.getElementById("rp").value;
+    let quality = "";
 
-  const rfLabor =
-    parseFloat(document.getElementById("rfLabor").value);
+    if(rf < 19){
+        quality = "Sehr jung / sehr energiereich";
+    }
+    else if(rf < 23){
+        quality = "Optimal für Milchvieh";
+    }
+    else if(rf < 27){
+        quality = "Strukturreich";
+    }
+    else{
+        quality = "Überständig";
+    }
 
-  const ndfLabor =
-    parseFloat(document.getElementById("ndfLabor").value);
+    document.getElementById("quality").innerText =
+        quality;
 
-  if (!isNaN(rfLabor)) {
-
-    const rfError =
-      rfLabor - calc.rf;
-
-    rfBase += rfError * 0.1;
-    rfRp += (rfError / rp) * 0.01;
-    rfTm += (rfError / tm) * 0.005;
-  }
-
-  if (!isNaN(ndfLabor)) {
-
-    const ndfError =
-      ndfLabor - calc.ndf;
-
-    ndfBase += ndfError * 0.1;
-    ndfRp += (ndfError / rp) * 0.01;
-    ndfTm += (ndfError / tm) * 0.005;
-  }
-
-  entries.unshift({
-    year,
-    schnitt,
-    tm,
-    rp,
-    rfEstimate: calc.rf.toFixed(2),
-    rfLabor: isNaN(rfLabor) ? "-" : rfLabor,
-    ndfEstimate: calc.ndf.toFixed(2),
-    ndfLabor: isNaN(ndfLabor) ? "-" : ndfLabor
-  });
-
-  history.unshift({
-    date: new Date().toLocaleDateString(),
-    rfFormula:
-      `RF = ${rfBase.toFixed(2)} - (${rfRp.toFixed(3)} × RP) + (${rfTm.toFixed(3)} × TM)`,
-
-    ndfFormula:
-      `NDF = ${ndfBase.toFixed(2)} - (${ndfRp.toFixed(3)} × RP) + (${ndfTm.toFixed(3)} × TM)`
-  });
-
-  renderEntries();
-  renderHistory();
-  calculate();
+    return {
+        rf,
+        ndf
+    };
 
 }
 
-function renderEntries() {
+function saveEntry(){
 
-  const table =
-    document.getElementById("entriesTable");
+    const calc = calculate();
 
-  table.innerHTML = "";
+    const year =
+        document.getElementById("year").value;
 
-  entries.forEach(e => {
+    const schnitt =
+        document.getElementById("schnitt").value;
 
-    table.innerHTML += `
-      <tr>
-        <td>${e.year}</td>
-        <td>${e.schnitt}</td>
-        <td>${e.tm}</td>
-        <td>${e.rp}</td>
-        <td>${e.rfEstimate}</td>
-        <td>${e.rfLabor}</td>
-        <td>${e.ndfEstimate}</td>
-        <td>${e.ndfLabor}</td>
-      </tr>
-    `;
+    const tm =
+        parseFloat(document.getElementById("tm").value);
 
-  });
+    const rp =
+        parseFloat(document.getElementById("rp").value);
+
+    const rfLabor =
+        parseFloat(document.getElementById("rfLabor").value);
+
+    const ndfLabor =
+        parseFloat(document.getElementById("ndfLabor").value);
+
+    if(!isNaN(rfLabor)){
+
+        const rfError =
+            rfLabor - calc.rf;
+
+        rfBase += rfError * 0.1;
+        rfRp += (rfError / rp) * 0.01;
+        rfTm += (rfError / tm) * 0.005;
+
+    }
+
+    if(!isNaN(ndfLabor)){
+
+        const ndfError =
+            ndfLabor - calc.ndf;
+
+        ndfBase += ndfError * 0.1;
+        ndfRp += (ndfError / rp) * 0.01;
+        ndfTm += (ndfError / tm) * 0.005;
+
+    }
+
+    const newEntry = {
+
+        year,
+        schnitt,
+        tm,
+        rp,
+
+        rfEstimate:
+            calc.rf.toFixed(2),
+
+        rfLabor:
+            isNaN(rfLabor) ? "-" : rfLabor,
+
+        ndfEstimate:
+            calc.ndf.toFixed(2),
+
+        ndfLabor:
+            isNaN(ndfLabor) ? "-" : ndfLabor
+
+    };
+
+    entries.unshift(newEntry);
+
+    history.unshift({
+
+        date:
+            new Date().toLocaleDateString(),
+
+        rfFormula:
+            `RF = ${rfBase.toFixed(2)} - (${rfRp.toFixed(3)} × RP) + (${rfTm.toFixed(3)} × TM)`,
+
+        ndfFormula:
+            `NDF = ${ndfBase.toFixed(2)} - (${ndfRp.toFixed(3)} × RP) + (${ndfTm.toFixed(3)} × TM)`
+
+    });
+
+    localStorage.setItem("entries", JSON.stringify(entries));
+    localStorage.setItem("history", JSON.stringify(history));
+
+    localStorage.setItem("rfBase", rfBase);
+    localStorage.setItem("rfRp", rfRp);
+    localStorage.setItem("rfTm", rfTm);
+
+    localStorage.setItem("ndfBase", ndfBase);
+    localStorage.setItem("ndfRp", ndfRp);
+    localStorage.setItem("ndfTm", ndfTm);
+
+    renderEntries();
+    renderHistory();
+    calculate();
+
+    document.getElementById("rfLabor").value = "";
+    document.getElementById("ndfLabor").value = "";
 
 }
 
-function renderHistory() {
+function renderEntries(){
 
-  const box =
-    document.getElementById("history");
+    const table =
+        document.getElementById("entriesTable");
 
-  box.innerHTML = "";
+    table.innerHTML = "";
 
-  history.forEach(h => {
+    entries.forEach(entry => {
 
-    box.innerHTML += `
-      <div class="history-box">
-        <strong>${h.date}</strong><br><br>
-        ${h.rfFormula}<br>
-        ${h.ndfFormula}
-      </div>
-    `;
+        table.innerHTML += `
 
-  });
+            <tr>
+
+                <td>${entry.year}</td>
+
+                <td>${entry.schnitt}</td>
+
+                <td>${entry.tm}</td>
+
+                <td>${entry.rp}</td>
+
+                <td>${entry.rfEstimate}</td>
+
+                <td>${entry.rfLabor}</td>
+
+                <td>${entry.ndfEstimate}</td>
+
+                <td>${entry.ndfLabor}</td>
+
+            </tr>
+
+        `;
+
+    });
+
+}
+
+function renderHistory(){
+
+    const box =
+        document.getElementById("history");
+
+    box.innerHTML = "";
+
+    history.forEach(item => {
+
+        box.innerHTML += `
+
+            <div class="history-box">
+
+                <strong>${item.date}</strong>
+
+                <div style="margin-top:8px;">
+                    ${item.rfFormula}
+                </div>
+
+                <div style="margin-top:4px;">
+                    ${item.ndfFormula}
+                </div>
+
+            </div>
+
+        `;
+
+    });
 
 }
 
 document.querySelectorAll("input").forEach(input => {
-  input.addEventListener("input", calculate);
+
+    input.addEventListener("input", calculate);
+
 });
 
+renderEntries();
+renderHistory();
 calculate();
 
 </script>
