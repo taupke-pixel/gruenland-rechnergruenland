@@ -1,326 +1,321 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 
 <title>Grünland RF & NDF Rechner</title>
 
 <style>
 
+*{
+box-sizing:border-box;
+}
+
 body{
-    margin:0;
-    padding:20px;
-    background:#f3f4f6;
-    font-family:Arial,sans-serif;
+margin:0;
+padding:15px;
+font-family:Arial,sans-serif;
+background:#f4f4f4;
 }
 
 .container{
-    max-width:1200px;
-    margin:auto;
+max-width:1200px;
+margin:auto;
 }
 
 .card{
-    background:white;
-    border-radius:20px;
-    padding:20px;
-    margin-bottom:20px;
-    box-shadow:0 4px 12px rgba(0,0,0,0.08);
-}
-
-h1,h2{
-    margin-top:0;
+background:white;
+border-radius:16px;
+padding:16px;
+margin-bottom:16px;
+box-shadow:0 2px 8px rgba(0,0,0,.08);
 }
 
 .grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-    gap:15px;
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+gap:10px;
 }
 
-input{
-    width:100%;
-    padding:12px;
-    border-radius:12px;
-    border:1px solid #ccc;
-    box-sizing:border-box;
-    margin-top:5px;
-    font-size:16px;
+input,
+textarea{
+width:100%;
+padding:10px;
+border-radius:10px;
+border:1px solid #ccc;
+font-size:16px;
+}
+
+textarea{
+min-height:80px;
 }
 
 button{
-    width:100%;
-    background:black;
-    color:white;
-    border:none;
-    padding:15px;
-    border-radius:14px;
-    font-size:16px;
-    cursor:pointer;
-    margin-top:20px;
+border:none;
+border-radius:10px;
+padding:10px 14px;
+cursor:pointer;
+margin:3px;
 }
 
-.result{
-    font-size:42px;
-    font-weight:bold;
-    margin-top:10px;
+.btn{
+background:#111;
+color:white;
+}
+
+.btn-red{
+background:#c62828;
+color:white;
+}
+
+.btn-green{
+background:#2e7d32;
+color:white;
+}
+
+.btn-blue{
+background:#1565c0;
+color:white;
+}
+
+.cut-card{
+background:#fafafa;
+border:1px solid #ddd;
+border-radius:12px;
+padding:12px;
+margin-top:12px;
 }
 
 .small{
-    color:#666;
-    margin-top:8px;
+font-size:13px;
+color:#666;
 }
 
 .formula{
-    font-size:15px;
-    margin-top:10px;
-    line-height:1.5;
-    word-break:break-word;
+background:#f8f8f8;
+padding:10px;
+border-radius:10px;
+margin-top:8px;
+word-break:break-word;
 }
 
-.table-wrap{
-    overflow-x:auto;
-}
-
-table{
-    width:100%;
-    border-collapse:collapse;
-    min-width:800px;
-}
-
-th,td{
-    text-align:left;
-    padding:10px;
-    border-bottom:1px solid #ddd;
-    font-size:14px;
-}
-
-.history-box{
-    background:#f8f8f8;
-    border-radius:12px;
-    padding:12px;
-    margin-bottom:10px;
+.stat{
+font-size:18px;
+font-weight:bold;
+margin-top:8px;
 }
 
 @media(max-width:700px){
 
-    body{
-        padding:10px;
-    }
+body{
+padding:10px;
+}
 
-    .card{
-        padding:15px;
-    }
-
-    .result{
-        font-size:34px;
-    }
+.card{
+padding:12px;
+}
 
 }
 
 </style>
+
 </head>
+
 <body>
 
 <div class="container">
 
-    <div class="card">
+<div class="card">
 
-        <h1>Grünland Rohfaser & NDF Rechner</h1>
+<h1>Grünland RF & NDF Rechner</h1>
 
-        <div class="grid">
+<div class="grid">
 
-            <div>
-                <label>Jahr</label>
-                <input type="number" id="year" value="2026">
-            </div>
+<div>
+<label>Jahr</label>
+<input id="year" type="number" value="2026">
+</div>
 
-            <div>
-                <label>Schnitt</label>
-                <input type="number" id="schnitt" value="1">
-            </div>
+<div>
+<label>Schnitt</label>
+<input id="schnitt" type="number" value="1">
+</div>
 
-            <div>
-                <label>TM-Ertrag (t/ha)</label>
-                <input type="number" step="0.1" id="tm" value="3">
-            </div>
+<div>
+<label>Datum</label>
+<input id="datum" type="date">
+</div>
 
-            <div>
-                <label>RP (% TM)</label>
-                <input type="number" step="0.1" id="rp" value="16.9">
-            </div>
+<div>
+<label>TM-Ertrag (t/ha)</label>
+<input id="tm" type="number" step="0.01">
+</div>
 
-            <div>
-                <label>RF Labor (%)</label>
-                <input type="number" step="0.1" id="rfLabor">
-            </div>
-
-            <div>
-                <label>NDF Labor (%)</label>
-                <input type="number" step="0.1" id="ndfLabor">
-            </div>
-
-        </div>
-
-        <div class="grid" style="margin-top:25px;">
-
-            <div class="card">
-
-                <h2>Geschätzte Rohfaser</h2>
-
-                <div class="result" id="rfResult">0%</div>
-
-                <div class="small" id="quality"></div>
-
-            </div>
-
-            <div class="card">
-
-                <h2>Geschätzte NDF</h2>
-
-                <div class="result" id="ndfResult">0%</div>
-
-            </div>
-
-            <div class="card">
-
-                <h2>Aktuelle Formel</h2>
-
-                <div class="formula" id="rfFormula"></div>
-
-                <div class="formula" id="ndfFormula"></div>
-
-            </div>
-
-        </div>
-
-        <button onclick="saveEntry()">
-            Schnitt speichern & Formel anpassen
-        </button>
-
-    </div>
-
-    <div class="card">
-
-        <h2>Gespeicherte Schnitte</h2>
-
-        <div class="table-wrap">
-
-            <table>
-
-                <thead>
-
-                    <tr>
-                        <th>Jahr</th>
-                        <th>Schnitt</th>
-                        <th>TM</th>
-                        <th>RP</th>
-                        <th>RF geschätzt</th>
-                        <th>RF Labor</th>
-                        <th>NDF geschätzt</th>
-                        <th>NDF Labor</th>
-                    </tr>
-
-                </thead>
-
-                <tbody id="entriesTable"></tbody>
-
-            </table>
-
-        </div>
-
-    </div>
-
-    <div class="card">
-
-        <h2>Formel Verlauf</h2>
-
-        <div id="history"></div>
-
-    </div>
+<div>
+<label>RP (% TM)</label>
+<input id="rp" type="number" step="0.01">
+</div>
 
 </div>
 
+<br>
+
+<label>Notiz</label>
+
+<textarea id="notiz"></textarea>
+
+<br><br>
+
+<button class="btn" onclick="addCut()">
+Schnitt speichern
+</button>
+
+<button class="btn-blue" onclick="exportData()">
+Backup exportieren
+</button>
+
+<input
+type="file"
+id="importFile"
+onchange="importData(event)">
+
+</div>
+
+<div class="card">
+
+<h2>Startformel</h2>
+
+<div class="formula">
+
+RF = 31.5 − (0.65 × RP) + (0.15 × TM)
+
+<br><br>
+
+NDF = 48 − (0.80 × RP) + (0.25 × TM)
+
+</div>
+
+</div>
+
+<div class="card">
+
+<h2>Aktuelle Formel</h2>
+
+<div
+id="currentFormula"
+class="formula">
+</div>
+
+</div>
+
+<div class="card">
+
+<h2>Statistik</h2>
+
+<div id="stats">
+</div>
+
+</div>
+
+<div class="card">
+
+<h2>Formelverlauf</h2>
+
+<div id="historyContainer">
+</div>
+
+</div>
+
+<div class="card">
+
+<h2>Gespeicherte Schnitte</h2>
+
+<div id="cutsContainer">
+</div>
+
+</div>
 <script>
 
-let rfBase =
-    parseFloat(localStorage.getItem("rfBase")) || 31.5;
+const STORAGE_KEY = "gruenland_rf_ndf_v5";
 
-let rfRp =
-    parseFloat(localStorage.getItem("rfRp")) || 0.65;
+const START_RF_BASE = 31.5;
+const START_RF_RP   = 0.65;
+const START_RF_TM   = 0.15;
 
-let rfTm =
-    parseFloat(localStorage.getItem("rfTm")) || 0.15;
+const START_NDF_BASE = 48;
+const START_NDF_RP   = 0.80;
+const START_NDF_TM   = 0.25;
 
-let ndfBase =
-    parseFloat(localStorage.getItem("ndfBase")) || 48;
+let data = loadData();
 
-let ndfRp =
-    parseFloat(localStorage.getItem("ndfRp")) || 0.8;
+function loadData(){
 
-let ndfTm =
-    parseFloat(localStorage.getItem("ndfTm")) || 0.25;
+    const saved =
+        localStorage.getItem(STORAGE_KEY);
 
-let entries =
-    JSON.parse(localStorage.getItem("entries")) || [];
+    if(saved){
 
-let history =
-    JSON.parse(localStorage.getItem("history")) || [];
+        try{
+            return JSON.parse(saved);
+        }
+        catch(e){
+        }
 
-function calculate(){
-
-    const tm =
-        parseFloat(document.getElementById("tm").value) || 0;
-
-    const rp =
-        parseFloat(document.getElementById("rp").value) || 0;
-
-    const rf =
-        rfBase - (rfRp * rp) + (rfTm * tm);
-
-    const ndf =
-        ndfBase - (ndfRp * rp) + (ndfTm * tm);
-
-    document.getElementById("rfResult").innerText =
-        rf.toFixed(2) + "%";
-
-    document.getElementById("ndfResult").innerText =
-        ndf.toFixed(2) + "%";
-
-    document.getElementById("rfFormula").innerText =
-        `RF = ${rfBase.toFixed(2)} - (${rfRp.toFixed(3)} × RP) + (${rfTm.toFixed(3)} × TM)`;
-
-    document.getElementById("ndfFormula").innerText =
-        `NDF = ${ndfBase.toFixed(2)} - (${ndfRp.toFixed(3)} × RP) + (${ndfTm.toFixed(3)} × TM)`;
-
-    let quality = "";
-
-    if(rf < 19){
-        quality = "Sehr jung / sehr energiereich";
     }
-    else if(rf < 23){
-        quality = "Optimal für Milchvieh";
-    }
-    else if(rf < 27){
-        quality = "Strukturreich";
-    }
-    else{
-        quality = "Überständig";
-    }
-
-    document.getElementById("quality").innerText =
-        quality;
 
     return {
-        rf,
-        ndf
+
+        cuts:[],
+
+        history:[],
+
+        formula:{
+
+            rfBase:START_RF_BASE,
+            rfRp:START_RF_RP,
+            rfTm:START_RF_TM,
+
+            ndfBase:START_NDF_BASE,
+            ndfRp:START_NDF_RP,
+            ndfTm:START_NDF_TM
+
+        }
+
     };
 
 }
 
-function saveEntry(){
+function saveData(){
 
-    const calc = calculate();
+    localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(data)
+    );
+
+}
+
+function currentRF(rp,tm){
+
+    return (
+        data.formula.rfBase
+        - (data.formula.rfRp * rp)
+        + (data.formula.rfTm * tm)
+    );
+
+}
+
+function currentNDF(rp,tm){
+
+    return (
+        data.formula.ndfBase
+        - (data.formula.ndfRp * rp)
+        + (data.formula.ndfTm * tm)
+    );
+
+}
+
+function addCut(){
 
     const year =
         document.getElementById("year").value;
@@ -328,173 +323,653 @@ function saveEntry(){
     const schnitt =
         document.getElementById("schnitt").value;
 
+    const datum =
+        document.getElementById("datum").value;
+
     const tm =
-        parseFloat(document.getElementById("tm").value);
+        parseFloat(
+            document
+            .getElementById("tm")
+            .value
+            .replace(",",".")
+        );
 
     const rp =
-        parseFloat(document.getElementById("rp").value);
+        parseFloat(
+            document
+            .getElementById("rp")
+            .value
+            .replace(",",".")
+        );
 
-    const rfLabor =
-        parseFloat(document.getElementById("rfLabor").value);
+    const notiz =
+        document.getElementById("notiz").value;
 
-    const ndfLabor =
-        parseFloat(document.getElementById("ndfLabor").value);
-
-    if(!isNaN(rfLabor)){
-
-        const rfError =
-            rfLabor - calc.rf;
-
-        rfBase += rfError * 0.1;
-        rfRp += (rfError / rp) * 0.01;
-        rfTm += (rfError / tm) * 0.005;
-
+    if(
+        isNaN(tm) ||
+        isNaN(rp)
+    ){
+        alert("TM und RP eingeben");
+        return;
     }
 
-    if(!isNaN(ndfLabor)){
+    const rfEstimate =
+        currentRF(rp,tm);
 
-        const ndfError =
-            ndfLabor - calc.ndf;
+    const ndfEstimate =
+        currentNDF(rp,tm);
 
-        ndfBase += ndfError * 0.1;
-        ndfRp += (ndfError / rp) * 0.01;
-        ndfTm += (ndfError / tm) * 0.005;
+    data.cuts.unshift({
 
-    }
-
-    const newEntry = {
+        id:Date.now(),
 
         year,
         schnitt,
+        datum,
+
         tm,
         rp,
 
-        rfEstimate:
-            calc.rf.toFixed(2),
+        notiz,
 
-        rfLabor:
-            isNaN(rfLabor) ? "-" : rfLabor,
+        rfEstimate:
+            Number(
+                rfEstimate.toFixed(2)
+            ),
 
         ndfEstimate:
-            calc.ndf.toFixed(2),
+            Number(
+                ndfEstimate.toFixed(2)
+            ),
 
-        ndfLabor:
-            isNaN(ndfLabor) ? "-" : ndfLabor
+        rfLabor:null,
+        ndfLabor:null,
 
-    };
-
-    entries.unshift(newEntry);
-
-    history.unshift({
-
-        date:
-            new Date().toLocaleDateString(),
-
-        rfFormula:
-            `RF = ${rfBase.toFixed(2)} - (${rfRp.toFixed(3)} × RP) + (${rfTm.toFixed(3)} × TM)`,
-
-        ndfFormula:
-            `NDF = ${ndfBase.toFixed(2)} - (${ndfRp.toFixed(3)} × RP) + (${ndfTm.toFixed(3)} × TM)`
+        calibrated:false
 
     });
 
-    localStorage.setItem("entries", JSON.stringify(entries));
-    localStorage.setItem("history", JSON.stringify(history));
+    saveData();
 
-    localStorage.setItem("rfBase", rfBase);
-    localStorage.setItem("rfRp", rfRp);
-    localStorage.setItem("rfTm", rfTm);
-
-    localStorage.setItem("ndfBase", ndfBase);
-    localStorage.setItem("ndfRp", ndfRp);
-    localStorage.setItem("ndfTm", ndfTm);
-
-    renderEntries();
-    renderHistory();
-    calculate();
-
-    document.getElementById("rfLabor").value = "";
-    document.getElementById("ndfLabor").value = "";
+    render();
 
 }
 
-function renderEntries(){
+function deleteCut(id){
 
-    const table =
-        document.getElementById("entriesTable");
+    if(
+        !confirm(
+            "Schnitt löschen?"
+        )
+    ){
+        return;
+    }
 
-    table.innerHTML = "";
+    data.cuts =
+        data.cuts.filter(
+            x => x.id !== id
+        );
 
-    entries.forEach(entry => {
+    saveData();
 
-        table.innerHTML += `
+    render();
 
-            <tr>
+}
 
-                <td>${entry.year}</td>
+function editCut(id){
 
-                <td>${entry.schnitt}</td>
+    const cut =
+        data.cuts.find(
+            x => x.id === id
+        );
 
-                <td>${entry.tm}</td>
+    if(!cut){
+        return;
+    }
 
-                <td>${entry.rp}</td>
+    const newTM =
+        prompt(
+            "TM-Ertrag",
+            cut.tm
+        );
 
-                <td>${entry.rfEstimate}</td>
+    if(newTM===null){
+        return;
+    }
 
-                <td>${entry.rfLabor}</td>
+    const newRP =
+        prompt(
+            "RP",
+            cut.rp
+        );
 
-                <td>${entry.ndfEstimate}</td>
+    if(newRP===null){
+        return;
+    }
 
-                <td>${entry.ndfLabor}</td>
+    cut.tm =
+        Number(
+            String(newTM)
+            .replace(",",".")
+        );
 
-            </tr>
+    cut.rp =
+        Number(
+            String(newRP)
+            .replace(",",".")
+        );
 
-        `;
+    cut.rfEstimate =
+        Number(
+            currentRF(
+                cut.rp,
+                cut.tm
+            ).toFixed(2)
+        );
+
+    cut.ndfEstimate =
+        Number(
+            currentNDF(
+                cut.rp,
+                cut.tm
+            ).toFixed(2)
+        );
+
+    saveData();
+
+    render();
+
+}
+
+function renderCurrentFormula(){
+
+    document.getElementById(
+        "currentFormula"
+    ).innerHTML =
+
+    `
+    RF =
+    ${data.formula.rfBase.toFixed(2)}
+    -
+    (${data.formula.rfRp.toFixed(3)}
+    × RP)
+    +
+    (${data.formula.rfTm.toFixed(3)}
+    × TM)
+
+    <br><br>
+
+    NDF =
+    ${data.formula.ndfBase.toFixed(2)}
+    -
+    (${data.formula.ndfRp.toFixed(3)}
+    × RP)
+    +
+    (${data.formula.ndfTm.toFixed(3)}
+    × TM)
+    `;
+
+}
+    function saveLaborValues(id){
+
+    const cut =
+        data.cuts.find(
+            x => x.id === id
+        );
+
+    if(!cut){
+        return;
+    }
+
+    const rfInput =
+        document.getElementById(
+            "rf_" + id
+        );
+
+    const ndfInput =
+        document.getElementById(
+            "ndf_" + id
+        );
+
+    const rfLabor =
+        Number(
+            String(rfInput.value)
+            .replace(",",".")
+        );
+
+    const ndfLabor =
+        Number(
+            String(ndfInput.value)
+            .replace(",",".")
+        );
+
+    if(
+        isNaN(rfLabor) ||
+        isNaN(ndfLabor)
+    ){
+        alert(
+            "RF und NDF Laborwerte eingeben"
+        );
+        return;
+    }
+
+    cut.rfLabor = rfLabor;
+    cut.ndfLabor = ndfLabor;
+    cut.calibrated = true;
+
+    recalculateFormula();
+
+    saveData();
+
+    render();
+
+}
+
+function recalculateFormula(){
+
+    const calibrated =
+        data.cuts.filter(
+            x =>
+                x.calibrated &&
+                x.rfLabor !== null &&
+                x.ndfLabor !== null
+        );
+
+    if(
+        calibrated.length === 0
+    ){
+        return;
+    }
+
+    let rfBase =
+        START_RF_BASE;
+
+    let ndfBase =
+        START_NDF_BASE;
+
+    let rfErrorSum = 0;
+    let ndfErrorSum = 0;
+
+    calibrated.forEach(c => {
+
+        rfErrorSum +=
+            (
+                c.rfLabor -
+                c.rfEstimate
+            );
+
+        ndfErrorSum +=
+            (
+                c.ndfLabor -
+                c.ndfEstimate
+            );
 
     });
+
+    const avgRFError =
+        rfErrorSum /
+        calibrated.length;
+
+    const avgNDFError =
+        ndfErrorSum /
+        calibrated.length;
+
+    data.formula.rfBase =
+        Number(
+            (
+                rfBase +
+                avgRFError
+            ).toFixed(3)
+        );
+
+    data.formula.nddfBase =
+        data.formula.ndfBase;
+
+    data.formula.ndfBase =
+        Number(
+            (
+                ndfBase +
+                avgNDFError
+            ).toFixed(3)
+        );
+
+    data.history.unshift({
+
+        date:
+            new Date()
+            .toLocaleString(),
+
+        formula:
+
+            "RF = " +
+            data.formula.rfBase.toFixed(2) +
+            " - (" +
+            data.formula.rfRp.toFixed(3) +
+            " × RP) + (" +
+            data.formula.rfTm.toFixed(3) +
+            " × TM)" +
+
+            " | NDF = " +
+
+            data.formula.ndfBase.toFixed(2) +
+            " - (" +
+            data.formula.ndfRp.toFixed(3) +
+            " × RP) + (" +
+            data.formula.ndfTm.toFixed(3) +
+            " × TM)"
+
+    });
+
+}
+
+function exportData(){
+
+    const blob =
+        new Blob(
+            [
+                JSON.stringify(
+                    data,
+                    null,
+                    2
+                )
+            ],
+            {
+                type:
+                "application/json"
+            }
+        );
+
+    const url =
+        URL.createObjectURL(
+            blob
+        );
+
+    const a =
+        document.createElement(
+            "a"
+        );
+
+    a.href = url;
+
+    a.download =
+        "gruenland_backup.json";
+
+    a.click();
+
+}
+
+function importData(event){
+
+    const file =
+        event.target.files[0];
+
+    if(!file){
+        return;
+    }
+
+    const reader =
+        new FileReader();
+
+    reader.onload =
+        function(e){
+
+            try{
+
+                data =
+                    JSON.parse(
+                        e.target.result
+                    );
+
+                saveData();
+
+                render();
+
+            }
+            catch(err){
+
+                alert(
+                    "Datei ungültig"
+                );
+
+            }
+
+        };
+
+    reader.readAsText(
+        file
+    );
+
+}
+
+function renderStats(){
+
+    const calibrated =
+        data.cuts.filter(
+            x =>
+                x.calibrated
+        );
+
+    let rfDiff = 0;
+    let ndfDiff = 0;
+
+    calibrated.forEach(c => {
+
+        rfDiff +=
+            Math.abs(
+                c.rfLabor -
+                c.rfEstimate
+            );
+
+        ndfDiff +=
+            Math.abs(
+                c.ndfLabor -
+                c.ndfEstimate
+            );
+
+    });
+
+    const avgRF =
+        calibrated.length
+        ?
+        (
+            rfDiff /
+            calibrated.length
+        ).toFixed(2)
+        :
+        "-";
+
+    const avgNDF =
+        calibrated.length
+        ?
+        (
+            ndfDiff /
+            calibrated.length
+        ).toFixed(2)
+        :
+        "-";
+
+    document.getElementById(
+        "stats"
+    ).innerHTML =
+
+    `
+    <div class="stat">
+    Schnitte:
+    ${data.cuts.length}
+    </div>
+
+    <div class="stat">
+    Kalibriert:
+    ${calibrated.length}
+    </div>
+
+    <div class="stat">
+    Ø RF-Abweichung:
+    ${avgRF}
+    </div>
+
+    <div class="stat">
+    Ø NDF-Abweichung:
+    ${avgNDF}
+    </div>
+    `;
 
 }
 
 function renderHistory(){
 
-    const box =
-        document.getElementById("history");
+    document.getElementById(
+        "historyContainer"
+    ).innerHTML =
 
-    box.innerHTML = "";
+    data.history.map(h =>
 
-    history.forEach(item => {
+        `
+        <div class="cut-card">
 
-        box.innerHTML += `
+        <strong>
+        ${h.date}
+        </strong>
 
-            <div class="history-box">
+        <br><br>
 
-                <strong>${item.date}</strong>
+        ${h.formula}
 
-                <div style="margin-top:8px;">
-                    ${item.rfFormula}
-                </div>
+        </div>
+        `
 
-                <div style="margin-top:4px;">
-                    ${item.ndfFormula}
-                </div>
-
-            </div>
-
-        `;
-
-    });
+    ).join("");
 
 }
 
-document.querySelectorAll("input").forEach(input => {
+function renderCuts(){
 
-    input.addEventListener("input", calculate);
+    document.getElementById(
+        "cutsContainer"
+    ).innerHTML =
 
-});
+    data.cuts.map(c =>
 
-renderEntries();
-renderHistory();
-calculate();
+        `
+        <div class="cut-card">
+
+        <strong>
+        ${c.year}
+        -
+        ${c.schnitt}. Schnitt
+        </strong>
+
+        <br><br>
+
+        Datum:
+        ${c.datum || "-"}
+
+        <br>
+
+        TM:
+        ${c.tm}
+
+        <br>
+
+        RP:
+        ${c.rp}
+
+        <br><br>
+
+        RF geschätzt:
+        ${c.rfEstimate}
+
+        <br>
+
+        NDF geschätzt:
+        ${c.ndfEstimate}
+
+        <br><br>
+
+        Notiz:
+
+        <br>
+
+        ${c.notiz || "-"}
+
+        <br><br>
+
+        ${
+            c.calibrated
+            ?
+            `
+            RF Labor:
+            ${c.rfLabor}
+
+            <br>
+
+            NDF Labor:
+            ${c.ndfLabor}
+            `
+            :
+            `
+
+            RF Labor
+
+            <input
+            id="rf_${c.id}"
+            type="number">
+
+            NDF Labor
+
+            <input
+            id="ndf_${c.id}"
+            type="number">
+
+            <button
+            class="btn-green"
+            onclick="saveLaborValues(${c.id})">
+
+            Laborwerte speichern
+
+            </button>
+
+            `
+        }
+
+        <br>
+
+        <button
+        class="btn-blue"
+        onclick="editCut(${c.id})">
+
+        Bearbeiten
+
+        </button>
+
+        <button
+        class="btn-red"
+        onclick="deleteCut(${c.id})">
+
+        Löschen
+
+        </button>
+
+        </div>
+        `
+
+    ).join("");
+
+}
+
+function render(){
+
+    renderCurrentFormula();
+
+    renderStats();
+
+    renderHistory();
+
+    renderCuts();
+
+}
+
+render();
 
 </script>
 
