@@ -928,20 +928,41 @@ function recalculateModel(){
 
     data.history.unshift({
 
-        date:
-            new Date()
-            .toLocaleString(),
+    date:
+        new Date()
+        .toLocaleString(),
 
-        formula:
+    formula:
 
-            JSON.stringify(
-                data.formula
-            )
+        "RF = " +
 
-    });
+        data.formula.rfBase.toFixed(3) +
 
-}
+        " + (" +
 
+        data.formula.rfRp.toFixed(3) +
+
+        " × RP) + (" +
+
+        data.formula.rfTm.toFixed(3) +
+
+        " × TM)<br><br>" +
+
+        "NDF = " +
+
+        data.formula.ndfBase.toFixed(3) +
+
+        " + (" +
+
+        data.formula.ndfRp.toFixed(3) +
+
+        " × RP) + (" +
+
+        data.formula.ndfTm.toFixed(3) +
+
+        " × TM)"
+
+});
 function renderFormula(){
 
     document.getElementById(
