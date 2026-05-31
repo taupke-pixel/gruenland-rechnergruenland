@@ -4,38 +4,49 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
-<title>Grünland RF & NDF Rechner</title>
+<title>Grünland RF & NDF Rechner V6</title>
 
 <style>
 
 *{
+margin:0;
+padding:0;
 box-sizing:border-box;
 }
 
 body{
-margin:0;
-padding:15px;
 font-family:Arial,sans-serif;
-background:#f4f4f4;
+background:#f3f4f6;
+padding:15px;
 }
 
 .container{
-max-width:1200px;
+max-width:1400px;
 margin:auto;
 }
 
 .card{
 background:white;
 border-radius:16px;
-padding:16px;
-margin-bottom:16px;
+padding:18px;
+margin-bottom:15px;
 box-shadow:0 2px 8px rgba(0,0,0,.08);
 }
 
 .grid{
 display:grid;
-grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-gap:10px;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:12px;
+}
+
+h1,h2,h3{
+margin-bottom:12px;
+}
+
+label{
+display:block;
+font-weight:bold;
+margin-bottom:5px;
 }
 
 input,
@@ -48,24 +59,21 @@ font-size:16px;
 }
 
 textarea{
-min-height:80px;
+min-height:90px;
+resize:vertical;
 }
 
 button{
+padding:10px 15px;
 border:none;
 border-radius:10px;
-padding:10px 14px;
 cursor:pointer;
-margin:3px;
+margin-right:5px;
+margin-top:5px;
 }
 
 .btn{
 background:#111;
-color:white;
-}
-
-.btn-red{
-background:#c62828;
 color:white;
 }
 
@@ -79,31 +87,35 @@ background:#1565c0;
 color:white;
 }
 
-.cut-card{
+.btn-red{
+background:#c62828;
+color:white;
+}
+
+.formulaBox{
+background:#f7f7f7;
+padding:12px;
+border-radius:12px;
+line-height:1.6;
+}
+
+.cutCard{
 background:#fafafa;
 border:1px solid #ddd;
 border-radius:12px;
 padding:12px;
-margin-top:12px;
-}
-
-.small{
-font-size:13px;
-color:#666;
-}
-
-.formula{
-background:#f8f8f8;
-padding:10px;
-border-radius:10px;
-margin-top:8px;
-word-break:break-word;
+margin-top:10px;
 }
 
 .stat{
 font-size:18px;
 font-weight:bold;
-margin-top:8px;
+margin-bottom:8px;
+}
+
+.small{
+font-size:13px;
+color:#666;
 }
 
 @media(max-width:700px){
@@ -119,7 +131,6 @@ padding:12px;
 }
 
 </style>
-
 </head>
 
 <body>
@@ -165,7 +176,7 @@ padding:12px;
 
 <textarea id="notiz"></textarea>
 
-<br><br>
+<br>
 
 <button class="btn" onclick="addCut()">
 Schnitt speichern
@@ -178,7 +189,8 @@ Backup exportieren
 <input
 type="file"
 id="importFile"
-onchange="importData(event)">
+onchange="importData(event)"
+style="margin-top:10px">
 
 </div>
 
@@ -186,7 +198,7 @@ onchange="importData(event)">
 
 <h2>Startformel</h2>
 
-<div class="formula">
+<div class="formulaBox">
 
 RF = 31.5 − (0.65 × RP) + (0.15 × TM)
 
@@ -200,11 +212,11 @@ NDF = 48 − (0.80 × RP) + (0.25 × TM)
 
 <div class="card">
 
-<h2>Aktuelle Formel</h2>
+<h2>Aktive Formel</h2>
 
 <div
-id="currentFormula"
-class="formula">
+id="formulaContainer"
+class="formulaBox">
 </div>
 
 </div>
@@ -213,7 +225,7 @@ class="formula">
 
 <h2>Statistik</h2>
 
-<div id="stats">
+<div id="statsContainer">
 </div>
 
 </div>
@@ -235,34 +247,38 @@ class="formula">
 </div>
 
 </div>
+
 <script>
+    const STORAGE_KEY = "gruenland_v6";
 
-const STORAGE_KEY = "gruenland_rf_ndf_v5";
+const START_FORMULA = {
 
-const START_RF_BASE = 31.5;
-const START_RF_RP   = 0.65;
-const START_RF_TM   = 0.15;
+    rfBase:31.5,
+    rfRp:-0.65,
+    rfTm:0.15,
 
-const START_NDF_BASE = 48;
-const START_NDF_RP   = 0.80;
-const START_NDF_TM   = 0.25;
+    ndfBase:48,
+    ndfRp:-0.80,
+    ndfTm:0.25
+
+};
 
 let data = loadData();
 
 function loadData(){
 
-    const saved =
-        localStorage.getItem(STORAGE_KEY);
+    try{
 
-    if(saved){
+        const saved =
+            localStorage.getItem(
+                STORAGE_KEY
+            );
 
-        try{
+        if(saved){
             return JSON.parse(saved);
         }
-        catch(e){
-        }
 
-    }
+    }catch(e){}
 
     return {
 
@@ -270,16 +286,10 @@ function loadData(){
 
         history:[],
 
+        activeFormula:"Startformel",
+
         formula:{
-
-            rfBase:START_RF_BASE,
-            rfRp:START_RF_RP,
-            rfTm:START_RF_TM,
-
-            ndfBase:START_NDF_BASE,
-            ndfRp:START_NDF_RP,
-            ndfTm:START_NDF_TM
-
+            ...START_FORMULA
         }
 
     };
@@ -292,373 +302,6 @@ function saveData(){
         STORAGE_KEY,
         JSON.stringify(data)
     );
-
-}
-
-function currentRF(rp,tm){
-
-    return (
-        data.formula.rfBase
-        - (data.formula.rfRp * rp)
-        + (data.formula.rfTm * tm)
-    );
-
-}
-
-function currentNDF(rp,tm){
-
-    return (
-        data.formula.ndfBase
-        - (data.formula.ndfRp * rp)
-        + (data.formula.ndfTm * tm)
-    );
-
-}
-
-function addCut(){
-
-    const year =
-        document.getElementById("year").value;
-
-    const schnitt =
-        document.getElementById("schnitt").value;
-
-    const datum =
-        document.getElementById("datum").value;
-
-    const tm =
-        parseFloat(
-            document
-            .getElementById("tm")
-            .value
-            .replace(",",".")
-        );
-
-    const rp =
-        parseFloat(
-            document
-            .getElementById("rp")
-            .value
-            .replace(",",".")
-        );
-
-    const notiz =
-        document.getElementById("notiz").value;
-
-    if(
-        isNaN(tm) ||
-        isNaN(rp)
-    ){
-        alert("TM und RP eingeben");
-        return;
-    }
-
-    const rfEstimate =
-        currentRF(rp,tm);
-
-    const ndfEstimate =
-        currentNDF(rp,tm);
-
-    data.cuts.unshift({
-
-        id:Date.now(),
-
-        year,
-        schnitt,
-        datum,
-
-        tm,
-        rp,
-
-        notiz,
-
-        rfEstimate:
-            Number(
-                rfEstimate.toFixed(2)
-            ),
-
-        ndfEstimate:
-            Number(
-                ndfEstimate.toFixed(2)
-            ),
-
-        rfLabor:null,
-        ndfLabor:null,
-
-        calibrated:false
-
-    });
-
-    saveData();
-
-    render();
-
-}
-
-function deleteCut(id){
-
-    if(
-        !confirm(
-            "Schnitt löschen?"
-        )
-    ){
-        return;
-    }
-
-    data.cuts =
-        data.cuts.filter(
-            x => x.id !== id
-        );
-
-    saveData();
-
-    render();
-
-}
-
-function editCut(id){
-
-    const cut =
-        data.cuts.find(
-            x => x.id === id
-        );
-
-    if(!cut){
-        return;
-    }
-
-    const newTM =
-        prompt(
-            "TM-Ertrag",
-            cut.tm
-        );
-
-    if(newTM===null){
-        return;
-    }
-
-    const newRP =
-        prompt(
-            "RP",
-            cut.rp
-        );
-
-    if(newRP===null){
-        return;
-    }
-
-    cut.tm =
-        Number(
-            String(newTM)
-            .replace(",",".")
-        );
-
-    cut.rp =
-        Number(
-            String(newRP)
-            .replace(",",".")
-        );
-
-    cut.rfEstimate =
-        Number(
-            currentRF(
-                cut.rp,
-                cut.tm
-            ).toFixed(2)
-        );
-
-    cut.ndfEstimate =
-        Number(
-            currentNDF(
-                cut.rp,
-                cut.tm
-            ).toFixed(2)
-        );
-
-    saveData();
-
-    render();
-
-}
-
-function renderCurrentFormula(){
-
-    document.getElementById(
-        "currentFormula"
-    ).innerHTML =
-
-    `
-    RF =
-    ${data.formula.rfBase.toFixed(2)}
-    -
-    (${data.formula.rfRp.toFixed(3)}
-    × RP)
-    +
-    (${data.formula.rfTm.toFixed(3)}
-    × TM)
-
-    <br><br>
-
-    NDF =
-    ${data.formula.ndfBase.toFixed(2)}
-    -
-    (${data.formula.ndfRp.toFixed(3)}
-    × RP)
-    +
-    (${data.formula.ndfTm.toFixed(3)}
-    × TM)
-    `;
-
-}
-    function saveLaborValues(id){
-
-    const cut =
-        data.cuts.find(
-            x => x.id === id
-        );
-
-    if(!cut){
-        return;
-    }
-
-    const rfInput =
-        document.getElementById(
-            "rf_" + id
-        );
-
-    const ndfInput =
-        document.getElementById(
-            "ndf_" + id
-        );
-
-    const rfLabor =
-        Number(
-            String(rfInput.value)
-            .replace(",",".")
-        );
-
-    const ndfLabor =
-        Number(
-            String(ndfInput.value)
-            .replace(",",".")
-        );
-
-    if(
-        isNaN(rfLabor) ||
-        isNaN(ndfLabor)
-    ){
-        alert(
-            "RF und NDF Laborwerte eingeben"
-        );
-        return;
-    }
-
-    cut.rfLabor = rfLabor;
-    cut.ndfLabor = ndfLabor;
-    cut.calibrated = true;
-
-    recalculateFormula();
-
-    saveData();
-
-    render();
-
-}
-
-function recalculateFormula(){
-
-    const calibrated =
-        data.cuts.filter(
-            x =>
-                x.calibrated &&
-                x.rfLabor !== null &&
-                x.ndfLabor !== null
-        );
-
-    if(
-        calibrated.length === 0
-    ){
-        return;
-    }
-
-    let rfBase =
-        START_RF_BASE;
-
-    let ndfBase =
-        START_NDF_BASE;
-
-    let rfErrorSum = 0;
-    let ndfErrorSum = 0;
-
-    calibrated.forEach(c => {
-
-        rfErrorSum +=
-            (
-                c.rfLabor -
-                c.rfEstimate
-            );
-
-        ndfErrorSum +=
-            (
-                c.ndfLabor -
-                c.ndfEstimate
-            );
-
-    });
-
-    const avgRFError =
-        rfErrorSum /
-        calibrated.length;
-
-    const avgNDFError =
-        ndfErrorSum /
-        calibrated.length;
-
-    data.formula.rfBase =
-        Number(
-            (
-                rfBase +
-                avgRFError
-            ).toFixed(3)
-        );
-
-    data.formula.nddfBase =
-        data.formula.ndfBase;
-
-    data.formula.ndfBase =
-        Number(
-            (
-                ndfBase +
-                avgNDFError
-            ).toFixed(3)
-        );
-
-    data.history.unshift({
-
-        date:
-            new Date()
-            .toLocaleString(),
-
-        formula:
-
-            "RF = " +
-            data.formula.rfBase.toFixed(2) +
-            " - (" +
-            data.formula.rfRp.toFixed(3) +
-            " × RP) + (" +
-            data.formula.rfTm.toFixed(3) +
-            " × TM)" +
-
-            " | NDF = " +
-
-            data.formula.ndfBase.toFixed(2) +
-            " - (" +
-            data.formula.ndfRp.toFixed(3) +
-            " × RP) + (" +
-            data.formula.ndfTm.toFixed(3) +
-            " × TM)"
-
-    });
 
 }
 
@@ -728,7 +371,7 @@ function importData(event){
             catch(err){
 
                 alert(
-                    "Datei ungültig"
+                    "Ungültige Datei"
                 );
 
             }
@@ -741,55 +384,624 @@ function importData(event){
 
 }
 
-function renderStats(){
+function predictRF(rp,tm){
 
-    const calibrated =
-        data.cuts.filter(
-            x =>
-                x.calibrated
+    return (
+
+        data.formula.rfBase +
+
+        data.formula.rfRp * rp +
+
+        data.formula.rfTm * tm
+
+    );
+
+}
+
+function predictNDF(rp,tm){
+
+    return (
+
+        data.formula.ndfBase +
+
+        data.formula.ndfRp * rp +
+
+        data.formula.ndfTm * tm
+
+    );
+
+}
+
+function addCut(){
+
+    const year =
+        document.getElementById(
+            "year"
+        ).value;
+
+    const schnitt =
+        document.getElementById(
+            "schnitt"
+        ).value;
+
+    const datum =
+        document.getElementById(
+            "datum"
+        ).value;
+
+    const notiz =
+        document.getElementById(
+            "notiz"
+        ).value;
+
+    const tm =
+        parseFloat(
+            String(
+                document
+                .getElementById("tm")
+                .value
+            ).replace(",",".")
         );
 
-    let rfDiff = 0;
-    let ndfDiff = 0;
+    const rp =
+        parseFloat(
+            String(
+                document
+                .getElementById("rp")
+                .value
+            ).replace(",",".")
+        );
 
-    calibrated.forEach(c => {
+    if(
+        isNaN(tm) ||
+        isNaN(rp)
+    ){
 
-        rfDiff +=
-            Math.abs(
-                c.rfLabor -
-                c.rfEstimate
+        alert(
+            "TM und RP eingeben"
+        );
+
+        return;
+
+    }
+
+    data.cuts.unshift({
+
+        id:Date.now(),
+
+        year,
+        schnitt,
+        datum,
+        notiz,
+
+        tm,
+        rp,
+
+        rfEstimate:
+            Number(
+                predictRF(
+                    rp,
+                    tm
+                ).toFixed(2)
+            ),
+
+        ndfEstimate:
+            Number(
+                predictNDF(
+                    rp,
+                    tm
+                ).toFixed(2)
+            ),
+
+        rfLabor:null,
+        ndfLabor:null,
+
+        calibrated:false,
+
+        created:
+            new Date()
+            .toISOString(),
+
+        modified:
+            new Date()
+            .toISOString()
+
+    });
+
+    saveData();
+
+    render();
+
+}
+
+function deleteCut(id){
+
+    if(
+        !confirm(
+            "Schnitt löschen?"
+        )
+    ){
+        return;
+    }
+
+    data.cuts =
+        data.cuts.filter(
+            c => c.id !== id
+        );
+
+    recalculateModel();
+
+    saveData();
+
+    render();
+
+}
+
+function editCut(id){
+
+    const cut =
+        data.cuts.find(
+            c => c.id === id
+        );
+
+    if(!cut){
+        return;
+    }
+
+    const tm =
+        prompt(
+            "TM-Ertrag",
+            cut.tm
+        );
+
+    if(tm===null){
+        return;
+    }
+
+    const rp =
+        prompt(
+            "RP",
+            cut.rp
+        );
+
+    if(rp===null){
+        return;
+    }
+
+    cut.tm =
+        Number(
+            String(tm)
+            .replace(",",".")
+        );
+
+    cut.rp =
+        Number(
+            String(rp)
+            .replace(",",".")
+        );
+
+    cut.modified =
+        new Date()
+        .toISOString();
+
+    recalculateModel();
+
+    saveData();
+
+    render();
+
+}
+
+function saveLabor(id){
+
+    const cut =
+        data.cuts.find(
+            c => c.id === id
+        );
+
+    if(!cut){
+        return;
+    }
+
+    const rf =
+        parseFloat(
+            String(
+                document
+                .getElementById(
+                    "rf_"+id
+                )
+                .value
+            ).replace(",",".")
+        );
+
+    const ndf =
+        parseFloat(
+            String(
+                document
+                .getElementById(
+                    "ndf_"+id
+                )
+                .value
+            ).replace(",",".")
+        );
+
+    if(
+        isNaN(rf) ||
+        isNaN(ndf)
+    ){
+
+        alert(
+            "RF und NDF eingeben"
+        );
+
+        return;
+
+    }
+
+    cut.rfLabor = rf;
+    cut.ndfLabor = ndf;
+    cut.calibrated = true;
+
+    cut.modified =
+        new Date()
+        .toISOString();
+
+    recalculateModel();
+
+    saveData();
+
+    render();
+
+}
+    function solve3x3(A,b){
+
+    const M = [
+        [A[0][0],A[0][1],A[0][2],b[0]],
+        [A[1][0],A[1][1],A[1][2],b[1]],
+        [A[2][0],A[2][1],A[2][2],b[2]]
+    ];
+
+    for(let i=0;i<3;i++){
+
+        let max=i;
+
+        for(let k=i+1;k<3;k++){
+
+            if(
+                Math.abs(M[k][i]) >
+                Math.abs(M[max][i])
+            ){
+                max=k;
+            }
+
+        }
+
+        [M[i],M[max]] =
+        [M[max],M[i]];
+
+        if(
+            Math.abs(M[i][i]) < 1e-10
+        ){
+            return null;
+        }
+
+        for(let k=i+1;k<3;k++){
+
+            const c =
+                M[k][i] /
+                M[i][i];
+
+            for(let j=i;j<4;j++){
+
+                M[k][j] -=
+                    c * M[i][j];
+
+            }
+
+        }
+
+    }
+
+    const x=[0,0,0];
+
+    for(let i=2;i>=0;i--){
+
+        x[i]=M[i][3];
+
+        for(let j=i+1;j<3;j++){
+
+            x[i]-=
+                M[i][j]*x[j];
+
+        }
+
+        x[i]/=
+            M[i][i];
+
+    }
+
+    return x;
+
+}
+
+function regressionModel(target){
+
+    const rows =
+        data.cuts.filter(c =>
+            c.calibrated &&
+            c.rfLabor !== null &&
+            c.ndfLabor !== null
+        );
+
+    if(rows.length < 3){
+        return null;
+    }
+
+    let sx=0;
+    let sz=0;
+    let sy=0;
+
+    let sxx=0;
+    let szz=0;
+    let sxz=0;
+
+    let sxy=0;
+    let szy=0;
+
+    rows.forEach(c => {
+
+        const x =
+            Number(c.rp);
+
+        const z =
+            Number(c.tm);
+
+        const y =
+            target==="rf"
+            ? Number(c.rfLabor)
+            : Number(c.ndfLabor);
+
+        sx += x;
+        sz += z;
+        sy += y;
+
+        sxx += x*x;
+        szz += z*z;
+        sxz += x*z;
+
+        sxy += x*y;
+        szy += z*y;
+
+    });
+
+    const A = [
+
+        [rows.length,sx,sz],
+
+        [sx,sxx,sxz],
+
+        [sz,sxz,szz]
+
+    ];
+
+    const B = [
+
+        sy,
+        sxy,
+        szy
+
+    ];
+
+    const result =
+        solve3x3(A,B);
+
+    if(!result){
+        return null;
+    }
+
+    return {
+
+        base:result[0],
+        rp:result[1],
+        tm:result[2]
+
+    };
+
+}
+
+function modelLooksValid(model){
+
+    if(!model){
+        return false;
+    }
+
+    if(
+        model.base < 0 ||
+        model.base > 100
+    ){
+        return false;
+    }
+
+    if(
+        model.rp > 0
+    ){
+        return false;
+    }
+
+    if(
+        Math.abs(model.rp) > 5
+    ){
+        return false;
+    }
+
+    if(
+        Math.abs(model.tm) > 5
+    ){
+        return false;
+    }
+
+    return true;
+
+}
+
+function recalculateModel(){
+
+    const rfModel =
+        regressionModel("rf");
+
+    const ndfModel =
+        regressionModel("ndf");
+
+    if(
+        modelLooksValid(rfModel) &&
+        modelLooksValid(ndfModel)
+    ){
+
+        data.formula = {
+
+            rfBase:
+                Number(
+                    rfModel.base.toFixed(5)
+                ),
+
+            rfRp:
+                Number(
+                    rfModel.rp.toFixed(5)
+                ),
+
+            rfTm:
+                Number(
+                    rfModel.tm.toFixed(5)
+                ),
+
+            ndfBase:
+                Number(
+                    ndfModel.base.toFixed(5)
+                ),
+
+            ndfRp:
+                Number(
+                    ndfModel.rp.toFixed(5)
+                ),
+
+            ndfTm:
+                Number(
+                    ndfModel.tm.toFixed(5)
+                )
+
+        };
+
+        data.activeFormula =
+            "Betriebsformel";
+
+    }
+    else{
+
+        data.formula = {
+            ...START_FORMULA
+        };
+
+        data.activeFormula =
+            "Startformel";
+
+    }
+
+    data.cuts.forEach(c => {
+
+        c.rfEstimate =
+            Number(
+                predictRF(
+                    c.rp,
+                    c.tm
+                ).toFixed(2)
             );
 
-        ndfDiff +=
-            Math.abs(
-                c.ndfLabor -
-                c.ndfEstimate
+        c.ndfEstimate =
+            Number(
+                predictNDF(
+                    c.rp,
+                    c.tm
+                ).toFixed(2)
             );
 
     });
 
-    const avgRF =
-        calibrated.length
-        ?
-        (
-            rfDiff /
-            calibrated.length
-        ).toFixed(2)
-        :
-        "-";
+    data.history.unshift({
 
-    const avgNDF =
-        calibrated.length
-        ?
-        (
-            ndfDiff /
-            calibrated.length
-        ).toFixed(2)
-        :
-        "-";
+        date:
+            new Date()
+            .toLocaleString(),
+
+        formula:
+
+            JSON.stringify(
+                data.formula
+            )
+
+    });
+
+}
+
+function renderFormula(){
 
     document.getElementById(
-        "stats"
+        "formulaContainer"
+    ).innerHTML =
+
+    `
+    <b>${data.activeFormula}</b>
+
+    <br><br>
+
+    RF =
+    ${data.formula.rfBase.toFixed(3)}
+    +
+    (${data.formula.rfRp.toFixed(3)}
+    × RP)
+    +
+    (${data.formula.rfTm.toFixed(3)}
+    × TM)
+
+    <br><br>
+
+    NDF =
+    ${data.formula.ndfBase.toFixed(3)}
+    +
+    (${data.formula.ndfRp.toFixed(3)}
+    × RP)
+    +
+    (${data.formula.ndfTm.toFixed(3)}
+    × TM)
+    `;
+
+}
+
+function renderStats(){
+
+    const calibrated =
+        data.cuts.filter(
+            c => c.calibrated
+        );
+
+    let rfErr=0;
+    let ndfErr=0;
+
+    calibrated.forEach(c => {
+
+        rfErr += Math.abs(
+            c.rfLabor -
+            c.rfEstimate
+        );
+
+        ndfErr += Math.abs(
+            c.ndfLabor -
+            c.ndfEstimate
+        );
+
+    });
+
+    document.getElementById(
+        "statsContainer"
     ).innerHTML =
 
     `
@@ -804,13 +1016,32 @@ function renderStats(){
     </div>
 
     <div class="stat">
-    Ø RF-Abweichung:
-    ${avgRF}
+    Aktive Formel:
+    ${data.activeFormula}
     </div>
 
     <div class="stat">
-    Ø NDF-Abweichung:
-    ${avgNDF}
+    Ø RF Fehler:
+    ${
+        calibrated.length
+        ?
+        (rfErr/calibrated.length)
+        .toFixed(2)
+        :
+        "-"
+    }
+    </div>
+
+    <div class="stat">
+    Ø NDF Fehler:
+    ${
+        calibrated.length
+        ?
+        (ndfErr/calibrated.length)
+        .toFixed(2)
+        :
+        "-"
+    }
     </div>
     `;
 
@@ -822,10 +1053,12 @@ function renderHistory(){
         "historyContainer"
     ).innerHTML =
 
-    data.history.map(h =>
+    data.history
+    .slice(0,100)
+    .map(h =>
 
         `
-        <div class="cut-card">
+        <div class="cutCard">
 
         <strong>
         ${h.date}
@@ -848,14 +1081,12 @@ function renderCuts(){
         "cutsContainer"
     ).innerHTML =
 
-    data.cuts.map(c =>
+    data.cuts.map(c => `
 
-        `
-        <div class="cut-card">
+        <div class="cutCard">
 
         <strong>
-        ${c.year}
-        -
+        ${c.year} -
         ${c.schnitt}. Schnitt
         </strong>
 
@@ -876,59 +1107,54 @@ function renderCuts(){
 
         <br><br>
 
-        RF geschätzt:
+        RF:
         ${c.rfEstimate}
 
         <br>
 
-        NDF geschätzt:
+        NDF:
         ${c.ndfEstimate}
 
         <br><br>
 
-        Notiz:
-
-        <br>
-
-        ${c.notiz || "-"}
+        ${c.notiz || ""}
 
         <br><br>
 
         ${
             c.calibrated
             ?
+
             `
             RF Labor:
             ${c.rfLabor}
-
             <br>
-
             NDF Labor:
             ${c.ndfLabor}
             `
+
             :
+
             `
-
             RF Labor
-
             <input
             id="rf_${c.id}"
-            type="number">
+            type="number"
+            step="0.01">
 
             NDF Labor
-
             <input
             id="ndf_${c.id}"
-            type="number">
+            type="number"
+            step="0.01">
 
             <button
             class="btn-green"
-            onclick="saveLaborValues(${c.id})">
+            onclick="saveLabor(${c.id})">
 
-            Laborwerte speichern
+            Labor speichern
 
             </button>
-
             `
         }
 
@@ -951,437 +1177,23 @@ function renderCuts(){
         </button>
 
         </div>
-        `
 
-    ).join("");
+    `).join("");
 
 }
 
 function render(){
 
-    renderCurrentFormula();
-
+    renderFormula();
     renderStats();
-
     renderHistory();
-
     renderCuts();
 
 }
 
 render();
 
-
-function calculateRegression(target){
-
-    const calibrated =
-        data.cuts.filter(c =>
-            c.calibrated &&
-            c.rfLabor !== null &&
-            c.ndfLabor !== null
-        );
-
-    if(calibrated.length < 3){
-        return null;
-    }
-
-    const rows = calibrated.map(c => {
-
-        return {
-            x1: 1,
-            x2: Number(c.rp),
-            x3: Number(c.tm),
-            y:
-                target === "rf"
-                ? Number(c.rfLabor)
-                : Number(c.ndfLabor)
-        };
-
-    });
-
-    let n = rows.length;
-
-    let sx2=0,sx3=0,sy=0;
-    let sx2x2=0,sx3x3=0,sx2x3=0;
-    let sx2y=0,sx3y=0;
-
-    rows.forEach(r=>{
-
-        sx2 += r.x2;
-        sx3 += r.x3;
-        sy += r.y;
-
-        sx2x2 += r.x2*r.x2;
-        sx3x3 += r.x3*r.x3;
-        sx2x3 += r.x2*r.x3;
-
-        sx2y += r.x2*r.y;
-        sx3y += r.x3*r.y;
-
-    });
-
-    const A = [
-        [n,sx2,sx3],
-        [sx2,sx2x2,sx2x3],
-        [sx3,sx2x3,sx3x3]
-    ];
-
-    const B = [
-        sy,
-        sx2y,
-        sx3y
-    ];
-
-    const result =
-        solve3x3(A,B);
-
-    if(!result){
-        return null;
-    }
-
-    return {
-        base:result[0],
-        rp:result[1],
-        tm:result[2]
-    };
-
-}
-
-function solve3x3(A,B){
-
-    const M = [
-
-        [A[0][0],A[0][1],A[0][2],B[0]],
-        [A[1][0],A[1][1],A[1][2],B[1]],
-        [A[2][0],A[2][1],A[2][2],B[2]]
-
-    ];
-
-    for(let i=0;i<3;i++){
-
-        let maxRow=i;
-
-        for(let k=i+1;k<3;k++){
-
-            if(
-                Math.abs(M[k][i]) >
-                Math.abs(M[maxRow][i])
-            ){
-                maxRow=k;
-            }
-
-        }
-
-        [
-            M[i],
-            M[maxRow]
-        ] =
-        [
-            M[maxRow],
-            M[i]
-        ];
-
-        if(
-            Math.abs(M[i][i]) < 0.000001
-        ){
-            return null;
-        }
-
-        for(let k=i+1;k<3;k++){
-
-            const c =
-                M[k][i] /
-                M[i][i];
-
-            for(let j=i;j<4;j++){
-
-                M[k][j] -=
-                    c *
-                    M[i][j];
-
-            }
-
-        }
-
-    }
-
-    const x=[0,0,0];
-
-    for(let i=2;i>=0;i--){
-
-        x[i]=M[i][3];
-
-        for(let j=i+1;j<3;j++){
-
-            x[i]-=
-                M[i][j]*
-                x[j];
-
-        }
-
-        x[i]/=M[i][i];
-
-    }
-
-    return x;
-            function updateFormulaFromAllCuts(){
-
-    const rfModel =
-        calculateRegression("rf");
-
-    const ndfModel =
-        calculateRegression("ndf");
-
-    let activeFormula =
-        "Startformel";
-
-    if(rfModel){
-
-        const rfValid =
-
-            rfModel.base > 0 &&
-            rfModel.base < 100 &&
-
-            rfModel.rp < 0 &&
-            rfModel.rp > -5 &&
-
-            rfModel.tm > -5 &&
-            rfModel.tm < 5;
-
-        if(rfValid){
-
-            data.formula.rfBase =
-                Number(
-                    rfModel.base.toFixed(4)
-                );
-
-            data.formula.rfRp =
-                Number(
-                    Math.abs(
-                        rfModel.rp
-                    ).toFixed(4)
-                );
-
-            data.formula.rfTm =
-                Number(
-                    rfModel.tm.toFixed(4)
-                );
-
-            activeFormula =
-                "Betriebsformel";
-
-        }
-
-    }
-
-    if(ndfModel){
-
-        const ndfValid =
-
-            ndfModel.base > 0 &&
-            ndfModel.base < 100 &&
-
-            ndfModel.rp < 0 &&
-            ndfModel.rp > -5 &&
-
-            ndfModel.tm > -5 &&
-            ndfModel.tm < 5;
-
-        if(ndfValid){
-
-            data.formula.ndfBase =
-                Number(
-                    ndfModel.base.toFixed(4)
-                );
-
-            data.formula.ndfRp =
-                Number(
-                    Math.abs(
-                        ndfModel.rp
-                    ).toFixed(4)
-                );
-
-            data.formula.ndfTm =
-                Number(
-                    ndfModel.tm.toFixed(4)
-                );
-
-            activeFormula =
-                "Betriebsformel";
-
-        }
-
-    }
-
-    data.activeFormula =
-        activeFormula;
-
-    data.history.unshift({
-
-        date:
-            new Date()
-            .toLocaleString(),
-
-        formula:
-
-            "RF = " +
-
-            data.formula.rfBase.toFixed(3) +
-
-            " - (" +
-
-            data.formula.rfRp.toFixed(3) +
-
-            " × RP) + (" +
-
-            data.formula.rfTm.toFixed(3) +
-
-            " × TM) | NDF = " +
-
-            data.formula.ndfBase.toFixed(3) +
-
-            " - (" +
-
-            data.formula.ndfRp.toFixed(3) +
-
-            " × RP) + (" +
-
-            data.formula.ndfTm.toFixed(3) +
-
-            " × TM)"
-
-    });
-
-}
-
-const oldSaveLaborValues =
-    saveLaborValues;
-
-saveLaborValues =
-function(id){
-
-    oldSaveLaborValues(id);
-
-    updateFormulaFromAllCuts();
-
-    saveData();
-
-    render();
-                const oldRenderStats =
-    renderStats;
-
-renderStats =
-function(){
-
-    oldRenderStats();
-
-    const stats =
-        document.getElementById(
-            "stats"
-        );
-
-    stats.innerHTML +=
-
-    `
-    <div class="stat">
-
-    Aktive Formel:
-
-    ${data.activeFormula || "Startformel"}
-
-    </div>
-    `;
-
-};
-
-const oldEditCut =
-    editCut;
-
-editCut =
-function(id){
-
-    oldEditCut(id);
-
-    const cut =
-        data.cuts.find(
-            x => x.id === id
-        );
-
-    if(
-        cut &&
-        cut.calibrated
-    ){
-
-        updateFormulaFromAllCuts();
-
-        saveData();
-
-        render();
-
-    }
-
-};
-
-const oldDeleteCut =
-    deleteCut;
-
-deleteCut =
-function(id){
-
-    oldDeleteCut(id);
-
-    updateFormulaFromAllCuts();
-
-    saveData();
-
-    render();
-
-};
-
-function recalculateEstimates(){
-
-    data.cuts.forEach(c => {
-
-        c.rfEstimate =
-            Number(
-                currentRF(
-                    c.rp,
-                    c.tm
-                ).toFixed(2)
-            );
-
-        c.ndfEstimate =
-            Number(
-                currentNDF(
-                    c.rp,
-                    c.tm
-                ).toFixed(2)
-            );
-
-    });
-
-}
-
-const oldUpdateFormula =
-    updateFormulaFromAllCuts;
-
-updateFormulaFromAllCuts =
-function(){
-
-    oldUpdateFormula();
-
-    recalculateEstimates();
-
-    saveData();
-
-};
-
-render();
-
 </script>
 
 </body>
-            </html>
-
-
-
+</html>
