@@ -417,16 +417,18 @@ function saveLabor(id){
             ).toFixed(2)
         );
 
-    cut.calibrated =
-        true;
+   cut.calibrated =
+    true;
 
-    cut.modified =
-        new Date()
-        .toISOString();
+cut.modified =
+    new Date()
+    .toISOString();
 
-    saveData();
+recalculateModels();
 
-    render();
+saveData();
+
+render();
 
 }
 function solveLinearSystem(A,b){
