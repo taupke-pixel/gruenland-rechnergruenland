@@ -1146,21 +1146,24 @@ else if(c.calibrated){
 
     `;
 
-            html += `
-            RP Labor
-            <input id="rpLabor_${c.id}" type="number" step="0.01">
+}
+else{
 
-            RF Labor
-            <input id="rfLabor_${c.id}" type="number" step="0.01">
+    html += `
+    RP Labor
+    <input id="rpLabor_${c.id}" type="number" step="0.01">
 
-            NDF Labor
-            <input id="ndfLabor_${c.id}" type="number" step="0.01">
+    RF Labor
+    <input id="rfLabor_${c.id}" type="number" step="0.01">
 
-            <button onclick="saveLabor(${c.id})">
-            Labor speichern
-            </button><br><br>
-            `;
-        }
+    NDF Labor
+    <input id="ndfLabor_${c.id}" type="number" step="0.01">
+
+    <button onclick="saveLabor(${c.id})">
+    Labor speichern
+    </button><br><br>
+    `;
+}
 
         html += `
         ${c.note || ""}<br><br>
