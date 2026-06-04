@@ -390,42 +390,7 @@ function cancelEdit(id){
 
 }
 
-    const tm =
-        prompt(
-            "TM-Ertrag",
-            cut.tm
-        );
-
-    if(tm===null){
-        return;
-    }
-
-    const rpField =
-        prompt(
-            "RP Feld",
-            cut.rpField
-        );
-
-    if(rpField===null){
-        return;
-    }
-
-    cut.tm =
-        Number(tm);
-
-    cut.rpField =
-        Number(rpField);
-
-    cut.modified =
-        new Date()
-        .toISOString();
-recalculateModels();
-
-    saveData();
-
-    render();
-
-}
+   
 
 function saveLabor(id){
 
