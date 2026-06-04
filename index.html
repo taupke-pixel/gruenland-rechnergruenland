@@ -92,10 +92,30 @@ Schnitt speichern
 </div>
 
 <div class="card">
+
+<h2>Datensicherung</h2>
+
+<button onclick="exportData()">
+Backup exportieren
+</button>
+
+<input
+type="file"
+id="importFile"
+style="display:none"
+onchange="importData(event)">
+
+<button
+onclick="document.getElementById('importFile').click()">
+Backup importieren
+</button>
+
+</div>
+
+<div class="card">
 <h2>Gespeicherte Schnitte</h2>
 <div id="cutsContainer"></div>
 </div>
-
 <script>
 const STORAGE_KEY = "gruenland_v6";
 
@@ -1184,7 +1204,92 @@ else{
 
 }
  
+function exportData(){
 
+    const blob =
+        new Blob(
+            [
+                JSON.stringify(
+                    data,
+                    null,
+                    2
+                )
+            ],
+            {
+                type:
+                "application/json"
+            }
+        );
+
+    const url =
+        URL.createObjectURL(
+            blob
+        );
+
+    const a =
+        document.createElement(
+            "a"
+        );
+
+    a.href = url;
+
+    a.download =
+        "gruenland_backup.json";
+
+    a.click();
+
+    URL.revokeObjectURL(
+        url
+    );
+
+}
+
+function importData(event){
+
+    const file =
+        event.target.files[0];
+
+    if(!file){
+        return;
+    }
+
+    const reader =
+        new FileReader();
+
+    reader.onload =
+        function(e){
+
+            try{
+
+                data =
+                    JSON.parse(
+                        e.target.result
+                    );
+
+                saveData();
+
+                render();
+
+                alert(
+                    "Backup erfolgreich geladen"
+                );
+
+            }
+            catch(err){
+
+                alert(
+                    "Ungültige Backup-Datei"
+                );
+
+            }
+
+        };
+
+    reader.readAsText(
+        file
+    );
+
+}
 function render(){
 
     updateAllEstimates();
