@@ -314,6 +314,82 @@ function editCut(id){
         return;
     }
 
+    cut.editMode = true;
+
+    render();
+
+}
+    function saveEdit(id){
+
+    const cut =
+        data.cuts.find(
+            c => c.id === id
+        );
+
+    if(!cut){
+        return;
+    }
+
+    cut.datum =
+        document
+        .getElementById(
+            "editDatum_" + id
+        ).value;
+
+    cut.monat =
+        Number(
+            cut.datum.split("-")[1]
+        );
+
+    cut.tm =
+        Number(
+            document
+            .getElementById(
+                "editTm_" + id
+            ).value
+        );
+
+    cut.rpField =
+        Number(
+            document
+            .getElementById(
+                "editRp_" + id
+            ).value
+        );
+
+    cut.note =
+        document
+        .getElementById(
+            "editNote_" + id
+        ).value;
+
+    cut.editMode = false;
+
+    recalculateModels();
+
+    saveData();
+
+    render();
+
+}
+
+function cancelEdit(id){
+
+    const cut =
+        data.cuts.find(
+            c => c.id === id
+        );
+
+    if(!cut){
+        return;
+    }
+
+    cut.editMode = false;
+
+    render();
+
+}
+
     const tm =
         prompt(
             "TM-Ertrag",
@@ -1049,16 +1125,61 @@ function renderCuts(){
         NDF Schätzung: ${c.ndfEstimate ?? "-"}<br><br>
         `;
 
-        if(c.calibrated){
+      if(c.editMode){
 
-            html += `
-            RP Labor: ${c.rpLabor}<br>
-            RF Labor: ${c.rfLabor}<br>
-            NDF Labor: ${c.ndfLabor}<br>
-            RP Verlust: ${c.rpLoss}<br><br>
-            `;
+    html += `
 
-        }else{
+    Datum
+    <input
+    id="editDatum_${c.id}"
+    type="date"
+    value="${c.datum}">
+
+    TM
+    <input
+    id="editTm_${c.id}"
+    type="number"
+    step="0.01"
+    value="${c.tm}">
+
+    RP Feld
+    <input
+    id="editRp_${c.id}"
+    type="number"
+    step="0.01"
+    value="${c.rpField}">
+
+    Notiz
+    <textarea
+    id="editNote_${c.id}">${c.note || ""}</textarea>
+
+    <button
+    onclick="saveEdit(${c.id})">
+
+    Speichern
+
+    </button>
+
+    <button
+    onclick="cancelEdit(${c.id})">
+
+    Abbrechen
+
+    </button>
+
+    `;
+
+}
+else if(c.calibrated){
+
+    html += `
+
+    RP Labor: ${c.rpLabor}<br>
+    RF Labor: ${c.rfLabor}<br>
+    NDF Labor: ${c.ndfLabor}<br>
+    RP Verlust: ${c.rpLoss}<br><br>
+
+    `;
 
             html += `
             RP Labor
