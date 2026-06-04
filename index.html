@@ -382,7 +382,67 @@ function editCut(id){
         .getElementById(
             "editNote_" + id
         ).value;
+cut.rpLabor =
+    document
+    .getElementById(
+        "editRpLabor_" + id
+    ).value === ""
 
+    ? null
+
+    : Number(
+        document
+        .getElementById(
+            "editRpLabor_" + id
+        ).value
+    );
+
+cut.rfLabor =
+    document
+    .getElementById(
+        "editRfLabor_" + id
+    ).value === ""
+
+    ? null
+
+    : Number(
+        document
+        .getElementById(
+            "editRfLabor_" + id
+        ).value
+    );
+
+cut.ndfLabor =
+    document
+    .getElementById(
+        "editNdfLabor_" + id
+    ).value === ""
+
+    ? null
+
+    : Number(
+        document
+        .getElementById(
+            "editNdfLabor_" + id
+        ).value
+    );
+
+if(
+    cut.rpLabor !== null
+){
+
+    cut.rpLoss =
+        Number(
+            (
+                cut.rpField -
+                cut.rpLabor
+            ).toFixed(2)
+        );
+
+    cut.calibrated =
+        true;
+
+}
     cut.editMode = false;
 
     recalculateModels();
@@ -1137,7 +1197,26 @@ function renderCuts(){
     Notiz
     <textarea
     id="editNote_${c.id}">${c.note || ""}</textarea>
+RP Labor
+<input
+id="editRpLabor_${c.id}"
+type="number"
+step="0.01"
+value="${c.rpLabor ?? ""}">
 
+RF Labor
+<input
+id="editRfLabor_${c.id}"
+type="number"
+step="0.01"
+value="${c.rfLabor ?? ""}">
+
+NDF Labor
+<input
+id="editNdfLabor_${c.id}"
+type="number"
+step="0.01"
+value="${c.ndfLabor ?? ""}">
     <button
     onclick="saveEdit(${c.id})">
 
